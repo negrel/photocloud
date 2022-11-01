@@ -18,7 +18,7 @@ services:
   
   # Sort files as their received from syncthing
   photosort:
-    image: negrel/photosort:v0.3
+    image: negrel/photosort:v0.4.0
     restart: always
     volumes:
       - $VOLUMES_DIR/photosort/config.toml:/etc/photosort.toml:ro
@@ -34,7 +34,7 @@ services:
 
     environment:
       - PHOTOVIEW_DATABASE_DRIVER=sqlite
-      - PHOTOVIEW_SQLITE_URL=/data
+      - PHOTOVIEW_SQLITE_URL=/data/photoview.db
       - PHOTOVIEW_LISTEN_IP=0.0.0.0
       - PHOTOVIEW_LISTEN_PORT=80
       - PHOTOVIEW_MEDIA_CACHE=/app/cache

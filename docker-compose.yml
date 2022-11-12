@@ -46,7 +46,7 @@ services:
       # - MAPBOX_TOKEN=<YOUR TOKEN HERE>
 
     volumes:
-      - $VOLUMES_DIR/photos:/photos:ro
+      - $VOLUMES_DIR/photos/sorted:/photos:ro
       - $VOLUMES_DIR/photoview/data:/data
       - api_cache:/app/cache
 
@@ -58,6 +58,7 @@ services:
     environment:
       - TZ=Europe/Paris
       - PHOTOSORT_OUTDIR=/photos
+      # One of monthly, weekly, daily, hourly
       - EXIF_FIX=weekly
       - CLEAN_REMOVED=hourly
     volumes:
@@ -65,4 +66,3 @@ services:
 
 volumes:
   api_cache: {}
-  data: {}

@@ -14,8 +14,8 @@ services:
       - 21027:21027/udp # Receive local discovery broadcasts
     volumes:
       - $VOLUMES_DIR/syncthing/config:/var/syncthing/config
-      - $VOLUMES_DIR/syncthing/data:/var/syncthing/data
-  
+      - $VOLUMES_DIR/photos/synced:/var/syncthing/data
+
   # Sort files as their received from syncthing
   photosort:
     image: negrel/photosort:v0.5.1
@@ -23,8 +23,9 @@ services:
     volumes:
       - $VOLUMES_DIR/photosort/config.toml:/etc/photosort.toml:ro
         # Map photosort source directory with syncthing folder path
-      - $VOLUMES_DIR/syncthing/data:/src:ro
-      - $VOLUMES_DIR/photosort/data:/dst
+        # Destination directory will be within /photos otherwise hardlinks
+        # won't work.
+      - $VOLUMES_DIR/photos/:/photos
 
   photoview:
     image: viktorstrate/photoview:2.3.13
@@ -45,10 +46,22 @@ services:
       # - MAPBOX_TOKEN=<YOUR TOKEN HERE>
 
     volumes:
-      # Map photosort output directory to photoview source directory
-      - $VOLUMES_DIR/photosort/data:/photos:ro
+      - $VOLUMES_DIR/photos:/photos:ro
       - $VOLUMES_DIR/photoview/data:/data
       - api_cache:/app/cache
+
+  cron:
+    image: photocloud_cleaner
+    build:
+      context: .
+      dockerfile: cron/Dockerfile
+    environment:
+      - TZ=Europe/Paris
+      - PHOTOSORT_OUTDIR=/photos
+      - EXIF_FIX=weekly
+      - CLEAN_REMOVED=hourly
+    volumes:
+      - $VOLUMES_DIR/photos/sorted:/photos
 
 volumes:
   api_cache: {}

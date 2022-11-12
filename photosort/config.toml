@@ -1,6 +1,6 @@
-sources = ["/src"]
+sources = ["/photos/synced"]
 ignore_regex = "\\.tmp$"
-replicator = ["hardlink", "softlink", "copy"]
-template = "/dst/:date.year:/:date.month:/:file.name:"
+replicator = ["hardlink", "softlink"]
+template = "/photos/sorted/:date.year:/:date.month:/:file.name:"
 overwrite = true
 

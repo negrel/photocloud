@@ -1,6 +1,6 @@
 # 🖼️ `photocloud`- A modular cloud photos.
 
-## Utilis scripts
+## Utils scripts
 
 ### `exif_fix.sh`
 
@@ -12,6 +12,17 @@ on their location. For example, it will add `2022:09:01 00:00:00` date to any fi
 ```shell
 # A maximum of 1024 parallel jobs
 MAX_JOBS=1024 ./exif_fix.sh /path/to/directory1 /path/to/directory2 ...
+```
+### `list_removed.sh`
+
+Recursively list files that are not present in `photos/synced/` directory.
+Files are listed if:
+- file is a symbolic link that points to no file.
+- file is a regular file with a link count of 0 (no hardlink).
+
+```shell
+# List every sorted photos that should be removed in ./photos/sorted/
+MAX_JOBS=1024 ./list_removed.sh ./photos/sorted/
 ```
 
 ## Contributing

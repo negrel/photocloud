@@ -18,7 +18,7 @@ services:
 
   # Sort files as their received from syncthing
   photosort:
-    image: negrel/photosort:v0.5.1
+    image: negrel/photosort:v0.5.2
     restart: always
     volumes:
       - $VOLUMES_DIR/photosort/config.toml:/etc/photosort.toml:ro

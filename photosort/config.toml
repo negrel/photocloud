@@ -1,6 +1,13 @@
+# Sources directories to watch
+# /photos/synced/ directory contains syncthing replicated files
 sources = ["/photos/synced"]
+# Ignore syncthing temporary files
 ignore_regex = "\\.tmp$"
-replicator = ["hardlink", "softlink"]
+# Recommended
+replicator = "hardlink"
+# Full list of variables available here
+# https://github.com/negrel/photosort
 template = "/photos/sorted/:date.year:/:date.month:/:file.name:"
-overwrite = true
+# Overwrite replicated file if it already exist
+overwrite = false
 

@@ -13,7 +13,9 @@ services:
       - 22000:22000/udp # QUIC file transfers
       - 21027:21027/udp # Receive local discovery broadcasts
     volumes:
+      # Syncthing configurations
       - $VOLUMES_DIR/syncthing/config:/var/syncthing/config
+      # Store synchronized files under photos/synced/
       - $VOLUMES_DIR/photos/synced:/var/syncthing/data
 
   # Sort files as their received from syncthing
@@ -22,7 +24,7 @@ services:
     restart: always
     volumes:
       - $VOLUMES_DIR/photosort/config.toml:/etc/photosort.toml:ro
-        # Map photosort source directory with syncthing folder path
+        # mount the entire /photos directory
         # Destination directory will be within /photos otherwise hardlinks
         # won't work.
       - $VOLUMES_DIR/photos/:/photos
@@ -57,9 +59,13 @@ services:
       dockerfile: cron/Dockerfile
     environment:
       - TZ=Europe/Paris
+      # Directory to analyze
       - PHOTOSORT_OUTDIR=/photos
+      # See `exif_fix.sh` in README.md
       # One of monthly, weekly, daily, hourly
       - EXIF_FIX=weekly
+      # See `When cron service remove file` in README.md
+      # One of monthly, weekly, daily, hourly
       - CLEAN_REMOVED=hourly
     volumes:
       - $VOLUMES_DIR/photos/sorted:/photos

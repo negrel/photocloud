@@ -8,6 +8,49 @@ A modular cloud photos made of the following components:
 Each component is optional and can be replaced depending of your need. For
 example, you could replace `photoview` with an FTP server (or deploy it along).
 
+This as the following advantages:
+- each component does one task but does it very well
+- you're not tied to any software
+
+and the following drawbacks:
+- Components can't communicate
+	- see [Why is there a cron service ?](#why-is-there-a-cron-service-)
+- Two source of truth
+	- files under `synced/` (files synchronized by `syncthing`) and `sorted/` (files sorted by `photosort`)
+
+## Big picture
+
+Before getting started, you must know a little bit of how `photocloud` works so
+you don't mess with your pictures.
+
+Services are designed as follow:
+- `syncthing`: synchronize files and store them under `photos/synced/`
+- `photosort`: sort files using **hardlink** from `photos/synced` to `photos/sorted`
+- `photoview`: Web app gallery showing pictures under `photos/sorted`
+
+But because components can't communicate, there is an extra service: `cron`.
+
+## Why is there a cron service ?
+
+The `cron` service is responsible of *cleaning* sorted photos.
+
+At the time of writing, it is responsible of:
+- removing replicated files whose source has been deleted by `syncthing`
+- adding date exif metadata to images that do not have it (see [`exif_fix.sh` utils scripts](#exif_fixsh))
+
+Without periodic scans (cron jobs), files removed by `syncthing` in `synced/` can't be removed of the `sorted/` directory.
+This is because `photosort` can't communicate with `syncthing` and **needs** the
+content of removed file under `synced/` to determine it's location under `sorted/`.
+
+This may be a hacky solution but it has one advantage: files aren't deleted immediately and
+you may recover them from the `sorted/` directory.
+
+### When `cron` service remove file ?
+
+During periodic scan, cron remove files if they meet one of the following conditions:
+- link count is 0, that is a file has no hardlink
+- a symbolic link point to inexistent file.
+
 ## Utils scripts
 
 ### `exif_fix.sh`

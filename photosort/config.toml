@@ -3,7 +3,7 @@
 sources = ["/photos/synced"]
 # Ignore syncthing temporary files
 ignore_regex = "\\.tmp$"
-# Recommended
+# Don't change this parameter
 replicator = "hardlink"
 # Full list of variables available here
 # https://github.com/negrel/photosort

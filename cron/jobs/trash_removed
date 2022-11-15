@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit
+
+trash_dir="$(dirname $PHOTOSORT_OUTDIR)/trash"
+mkdir -p "$trash_dir"
+
+exec list_removed.sh "$PHOTOSORT_OUTDIR" | xargs -I{} /bin/sh -c 'echo "Trashing {}..."; mv "{}" $trash_dir'

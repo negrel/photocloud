@@ -59,14 +59,16 @@ services:
       dockerfile: cron/Dockerfile
     environment:
       - TZ=Europe/Paris
-      # Directory to analyze
+      # photosort out directory
       - PHOTOSORT_OUTDIR=/photos
       # See `exif_fix.sh` in README.md
       # One of monthly, weekly, daily, hourly
       - EXIF_FIX=weekly
+      # Trash sorted files whose source has been removed by syncthing
+      - TRASH_REMOVED=daily
       # See `When cron service remove file` in README.md
       # One of monthly, weekly, daily, hourly
-      - CLEAN_REMOVED=hourly
+      - EMPTY_TRASH=weekly
     volumes:
       - $VOLUMES_DIR/photos/sorted:/photos
 

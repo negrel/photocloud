@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit
+
+exec exif_fix.sh $PHOTOSORT_OUTDIR
+

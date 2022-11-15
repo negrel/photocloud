@@ -4,7 +4,8 @@ set -euo pipefail
 shopt -s inherit_errexit
 
 : ${EXIF_FIX="disabled"}
-: ${CLEAN_REMOVED="disabled"}
+: ${TRASH_REMOVED="disabled"}
+: ${EMPTY_TRASH="disabled"}
 : ${PHOTOSORT_OUTDIR=""}
 : ${TZ=""}
 
@@ -14,7 +15,7 @@ if [ -n "TZ" ]; then
 	echo "$TZ" > /etc/timezone
 fi
 
-# Check PHOTOSORT_OUTDIR paramter
+# Check PHOTOSORT_OUTDIR parameter
 if [ -z "$PHOTOSORT_OUTDIR" ]; then
 	echo "ERROR - photosort out directory is not specified"
 	exit 1
@@ -24,58 +25,34 @@ if [ ! -d "$PHOTOSORT_OUTDIR" ]; then
 	exit 1
 fi
 
-case "$EXIF_FIX" in
-	""|"disabled")
-		echo "INFO - exif fix disabled"
-		;;
+cron_job() {
+	local name="$1"
+	local desc="$2"
+	local recurr="$3"
+	local bin="$4"
 
-	"monthly"|"weekly"|"daily"|"hourly")
-		cron_dir="/etc/periodic/$EXIF_FIX"
-		cron_script="$cron_dir/exif_fix"
-		cat <<EOF > "$cron_script"
-#!/usr/bin/env bash
+	case "$recurr" in
+		""|"disabled")
+			echo "INFO - $desc disabled"
+			;;
 
-set -euo pipefail
-shopt -s inherit_errexit
+		"monthly"|"weekly"|"daily"|"hourly")
+			cron_dir="/etc/periodic/$recurr"
+			chmod +x "$bin"
+			mv "$bin" "$cron_dir"
+			echo "INFO - $desc will be executed $recurr"
+			;;
 
-exec exif_fix.sh $PHOTOSORT_OUTDIR
-EOF
-		chmod +x "$cron_script"
-		echo "INFO - exif fix will be executed $EXIF_FIX"
-		;;
+		*)
+			echo "ERROR - \"$recurr\" is an invalid value for \"$name\" cron job: must be one of \"disabled\", \"monthly\", \"weekly\", \"daily\", \"hourly\""
+			exit 1
+			;;
+	esac
+}
 
-	*)
-		echo "ERROR - \"$EXIF_FIX\" is an invalid value for \$EXIF_FIX: must be one of \"disabled\", \"monthly\", \"weekly\", \"daily\", \"hourly\""
-		exit 1
-		;;
-esac
-
-
-case "$CLEAN_REMOVED" in
-	""|"disabled")
-		echo "INFO - cleaning of removed files disabled"
-		;;
-
-	"monthly"|"weekly"|"daily"|"hourly")
-		cron_dir="/etc/periodic/$CLEAN_REMOVED"
-		cron_script="$cron_dir/clean_removed"
-		cat <<EOF >> "$cron_script"
-#!/usr/bin/env bash
-
-set -euo pipefail
-shopt -s inherit_errexit
-
-exec list_removed.sh $PHOTOSORT_OUTDIR | xargs -I{} /bin/sh -c 'echo "Removing {}..."; rm -f "{}"'
-EOF
-		chmod +x "$cron_script"
-		echo "INFO - cleaning of removed files will be executed $CLEAN_REMOVED"
-		;;
-
-	*)
-		echo "ERROR - \"$CLEAN_REMOVED\" is an invalid value for \$CLEAN_REMOVED: must be one of \"disabled\", \"monthly\", \"weekly\", \"daily\", \"hourly\""
-		exit 1
-		;;
-esac
+cron_job "EXIF_FIX" "exif fix" "$EXIF_FIX" "/jobs/exif_fix"
+cron_job "TRASH_REMOVED" "trash of removed files" "$TRASH_REMOVED" "/jobs/trash_removed"
+cron_job "EMPTY_TRASH" "empty of trash directory" "$EMPTY_TRASH" "/jobs/empty_trash"
 
 exec crond -f -L /dev/stdout
 
